@@ -4,6 +4,7 @@ import subprocess
 import urllib
 
 import grequests
+import numpy
 
 
 def get_change_ids(repo_path, since="6.months"):
@@ -30,16 +31,36 @@ def get_change_ids(repo_path, since="6.months"):
     return change_ids
 
 
+def query_gerrit(template, change_ids, repo_name):
+    """query gerrit."""
+    queries = []
+    template = "https://review.openstack.org" + template
+    for change_id in change_ids:
+        # ChangeIDs can be used in multiple branches/repos
+        patch_id = urllib.quote_plus("%s~master~" % repo_name) + change_id
+        queries.append(template % patch_id)
+    unsent = (grequests.get(query) for query in queries)
+    for r in grequests.map(unsent, size=10):
+        yield json.loads(r.text[4:])
+
+
 def get_change_details(change_ids, repo_name):
     """get gerrit change details for a list of change_id.
 
     Returns a generator
     """
-    queries = []
-    for change_id in change_ids:
-        # ChangeIDs can be used in multiple branches/repos
-        patch_id = urllib.quote_plus("%s~master~" % repo_name) + change_id
-        queries.append("https://review.openstack.org/changes/%s/detail" % patch_id)
-    unsent = (grequests.get(query) for query in queries)
-    for r in grequests.map(unsent, size=10):
-        yield json.loads(r.text[4:])
+    return query_gerrit("/changes/%s/detail", change_ids, repo_name)
+
+
+def get_latest_revision(change_ids, repo_name):
+    """get latest revisions for a list of change_ids.
+
+    Returns a generator
+    """
+    return query_gerrit("/changes/%s/revisions/current/review",
+                        change_ids, repo_name)
+
+def stats(values):
+    print "Average: %s" % numpy.mean(values)
+    print "median: %s" % numpy.median(values)
+    print "variance: %s" % numpy.var(values)

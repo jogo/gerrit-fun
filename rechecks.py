@@ -85,8 +85,8 @@ def plot_rechecks(normalized_rechecks):
 
 def main():
     change_ids = library.get_change_ids("/home/jogo/Develop/openstack/nova")
-    rechecks = get_rechecks(change_ids[:1000], "openstack/nova")
-    print "Average: %s" % float(sum(rechecks)/len(rechecks))
+    rechecks = get_rechecks(change_ids[:800], "openstack/nova")
+    library.stats(rechecks)
     plot_rechecks(rechecks)
 
 if __name__ == '__main__':
