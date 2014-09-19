@@ -45,19 +45,20 @@ def valid_recheck(change_details, recheck_position):
                 new_list = get_failed_jobs(message['message'])
                 for failure in failure_list:
                     if failure in new_list:
-                        logger.debug("recheck didn't work before: %s, after %s" % (failure_list, new_list))
-                        logger.debug(message['message'])
+                        logger.debug("recheck didn't work, found %s before and after" % failure)
+                        #logger.debug(message['message'].split('\n')[4])
                         # Found failure after the recheck
                         return False
-            # Stop after first jenkins comment after recheck
-            return True
+                # Stop after first jenkins comment after recheck
+                return True
 
 
 def get_failed_jobs(message):
     """Return list of failed jenkins jobs."""
     failure_list = []
     for line in message.split("\n"):
-        if "FAILURE" in line:
+        # Look for voting failures
+        if "FAILURE" in line and "(non-voting)" not in line:
             failure_list.append(line.split(' ')[1])
     return failure_list
 
@@ -65,11 +66,8 @@ def get_failed_jobs(message):
 def get_rechecks(change_ids, repo):
     """Go through a list of Change-Ids and count the rechecks."""
     rechecks = []
-    mod = len(change_ids)/10 # For print logs
     for i, details in enumerate(library.get_change_details(change_ids, repo)):
         rechecks.append(count_rechecks(details))
-        if i % mod == 0:
-            logger.debug(i)
     return rechecks
 
 
@@ -87,7 +85,7 @@ def plot_rechecks(normalized_rechecks):
 
 def main():
     change_ids = library.get_change_ids("/home/jogo/Develop/openstack/nova")
-    rechecks = get_rechecks(change_ids[:800], "openstack/nova")
+    rechecks = get_rechecks(change_ids[:1000], "openstack/nova")
     print "Average: %s" % float(sum(rechecks)/len(rechecks))
     plot_rechecks(rechecks)
 
