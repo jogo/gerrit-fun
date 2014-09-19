@@ -66,9 +66,8 @@ def get_rechecks(change_ids, repo):
     """Go through a list of Change-Ids and count the rechecks."""
     rechecks = []
     mod = len(change_ids)/10 # For print logs
-    for i, change_id in enumerate(change_ids):
-        rechecks.append(count_rechecks(library.get_change_details(
-            change_id, repo)))
+    for i, details in enumerate(library.get_change_details(change_ids, repo)):
+        rechecks.append(count_rechecks(details))
         if i % mod == 0:
             logger.debug(i)
     return rechecks
@@ -88,7 +87,7 @@ def plot_rechecks(normalized_rechecks):
 
 def main():
     change_ids = library.get_change_ids("/home/jogo/Develop/openstack/nova")
-    rechecks = get_rechecks(change_ids[:400], "openstack/nova")
+    rechecks = get_rechecks(change_ids[:800], "openstack/nova")
     print "Average: %s" % float(sum(rechecks)/len(rechecks))
     plot_rechecks(rechecks)
 

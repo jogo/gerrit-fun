@@ -3,7 +3,7 @@ import os
 import subprocess
 import urllib
 
-import requests
+import grequests
 
 
 def get_change_ids(repo_path, since="6.months"):
@@ -30,12 +30,16 @@ def get_change_ids(repo_path, since="6.months"):
     return change_ids
 
 
-def get_change_details(change_id, repo_name):
-    """get gerrit change details for a given change_id."""
-    # TODO(jogo) remove hard coded nova
-    # ChangeIDs can be used in multiple branches/repos
-    patch_id = urllib.quote_plus("%s~master~" % repo_name) + change_id
-    query = "https://review.openstack.org/changes/%s/detail" % patch_id
-    r = requests.get(query)
-    change = json.loads(r.text[4:])
-    return change
+def get_change_details(change_ids, repo_name):
+    """get gerrit change details for a list of change_id.
+
+    Returns a generator
+    """
+    queries = []
+    for change_id in change_ids:
+        # ChangeIDs can be used in multiple branches/repos
+        patch_id = urllib.quote_plus("%s~master~" % repo_name) + change_id
+        queries.append("https://review.openstack.org/changes/%s/detail" % patch_id)
+    unsent = (grequests.get(query) for query in queries)
+    for r in grequests.map(unsent, size=10):
+        yield json.loads(r.text[4:])
