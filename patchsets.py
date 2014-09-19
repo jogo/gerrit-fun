@@ -26,7 +26,7 @@ def count_rechecks(change_details):
         if ("\nrecheck" in message['message'] or
                 "\nreverify" in message['message']):
             count += 1
-    print json.dumps(change_details, sort_keys=True, indent=2)
+    # print json.dumps(change_details, sort_keys=True, indent=2)
     return (float(count) / number_of_revisions)
 
 

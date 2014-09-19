@@ -4,35 +4,68 @@ import matplotlib.pyplot as plt
 
 import library
 
+
 """Q: How many rechecks does it take to merge a patch?
 
 Plot over time.
 Normalize for number of revisions
 
-To distinguish between user error and valid rechecks, ignore rechecks where there is at least one job failure in common on both sides of the recheck.
+To distinguish between user error and valid rechecks, ignore rechecks where
+there is at least one job failure in common on both sides of the recheck.
 """
 
 logging.basicConfig()
 logger = logging.getLogger("recheck")
 logger.setLevel(logging.DEBUG)
 
+
 def count_rechecks(change_details):
     """Count number of recheck comments in a change."""
     count = 0
     number_of_revisions = 0
-    for message in change_details['messages']:
+    for i, message in enumerate(change_details['messages']):
         number_of_revisions = max(number_of_revisions,
                                   message['_revision_number'])
         if ("\nrecheck" in message['message'] or
                 "\nreverify" in message['message']):
-            count += 1
-    # print json.dumps(change_details, sort_keys=True, indent=2)
+            if valid_recheck(change_details, i):
+                count += 1
     return (float(count) / number_of_revisions)
 
 
+def valid_recheck(change_details, recheck_position):
+    """Return True if the failure before isn't seen after the recheck."""
+    failure_list = []
+    for i, message in enumerate(change_details['messages']):
+        if 'author' in message and message['author'].get('username') == 'jenkins':
+            if i < recheck_position:
+                # before the comment
+                failure_list = get_failed_jobs(message['message'])
+            else:
+                new_list = get_failed_jobs(message['message'])
+                for failure in failure_list:
+                    if failure in new_list:
+                        logger.debug("recheck didn't work before: %s, after %s" % (failure_list, new_list))
+                        logger.debug(message['message'])
+                        # Found failure after the recheck
+                        return False
+            # Stop after first jenkins comment after recheck
+            return True
+
+
+def get_failed_jobs(message):
+    """Return list of failed jenkins jobs."""
+    failure_list = []
+    for line in message.split("\n"):
+        if "FAILURE" in line:
+            failure_list.append(line.split(' ')[1])
+    return failure_list
+
+
 def get_rechecks(change_ids, repo):
+    """Go through a list of Change-Ids and count the rechecks."""
     rechecks = []
-    mod = len(change_ids)/10
+    mod = len(change_ids)/10 # For print logs
     for i, change_id in enumerate(change_ids):
         rechecks.append(count_rechecks(library.get_change_details(
             change_id, repo)))
