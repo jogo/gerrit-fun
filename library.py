@@ -7,7 +7,7 @@ import grequests
 import numpy
 
 
-def get_change_ids(repo_path, since="6.months"):
+def get_change_ids(repo_path, subtree=None, since="6.months"):
     """Return array of change-Ids of merged patches.
 
     returns list starting with most recent change
@@ -18,7 +18,9 @@ def get_change_ids(repo_path, since="6.months"):
     change_ids = []
     cwd = os.getcwd()
     os.chdir(repo_path)
-    command = ("git log --no-merges --since=%s master" % since)
+    command = "git log --no-merges --since=%s master" % since
+    if subtree:
+        command = command + " " + subtree
     log = subprocess.check_output(command.split(' '))
     os.chdir(cwd)
     lines = log.splitlines()
@@ -59,6 +61,7 @@ def get_latest_revision(change_ids, repo_name):
     """
     return query_gerrit("/changes/%s/revisions/current/review",
                         change_ids, repo_name)
+
 
 def stats(values):
     print "Average: %s" % numpy.mean(values)

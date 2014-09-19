@@ -72,13 +72,12 @@ def get_rechecks(change_ids, repo):
 
 
 def plot_rechecks(normalized_rechecks):
-    y = normalized_rechecks
+    y = sorted(normalized_rechecks)
     x = range(len(normalized_rechecks))
 
     plt.plot(x, y)
     plt.title("Q: How many rechecks/reverifies does it take to "
               "merge a patch in nova?")
-    plt.xlabel("X[0]=HEAD, X[1]=HEAD^")
     plt.ylabel("(# of rechecks and reverifies)/(# of patch revisions)")
     plt.show()
 

@@ -18,20 +18,20 @@ logger.setLevel(logging.DEBUG)
 
 def get_revisions(change_ids, repo):
     revisions = []
-    for i, details in enumerate(library.get_latest_revision(change_ids, repo)):
+    for details in library.get_latest_revision(change_ids, repo):
         current_revision = details['current_revision']
         revision_number = details['revisions'][current_revision]['_number']
         revisions.append(revision_number)
     return revisions
 
+
 def plot_revisions(revisions):
-    y = revisions
+    y = sorted(revisions)
     x = range(len(revisions))
 
     plt.plot(x, y)
     plt.title("Q: How many revisions  does it take to "
               "merge a patch in nova?")
-    plt.xlabel("X[0]=HEAD, X[1]=HEAD^")
     plt.ylabel("number of revisions")
     plt.show()
 
