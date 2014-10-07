@@ -37,7 +37,8 @@ def valid_recheck(change_details, recheck_position):
     """Return True if the failure before isn't seen after the recheck."""
     failure_list = []
     for i, message in enumerate(change_details['messages']):
-        if 'author' in message and message['author'].get('username') == 'jenkins':
+        if ('author' in message and
+                message['author'].get('username') == 'jenkins'):
             if i < recheck_position:
                 # before the comment
                 failure_list = get_failed_jobs(message['message'])
@@ -45,8 +46,9 @@ def valid_recheck(change_details, recheck_position):
                 new_list = get_failed_jobs(message['message'])
                 for failure in failure_list:
                     if failure in new_list:
-                        logger.debug("recheck didn't work, found %s before and after" % failure)
-                        #logger.debug(message['message'].split('\n')[4])
+                        logger.debug("recheck didn't work, found %s before "
+                                     "and after" % failure)
+                        # logger.debug(message['message'].split('\n')[4])
                         # Found failure after the recheck
                         return False
                 # Stop after first jenkins comment after recheck
