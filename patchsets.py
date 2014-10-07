@@ -37,10 +37,16 @@ def plot_revisions(revisions):
 
 
 def main():
-    change_ids = library.get_change_ids("/home/jogo/Develop/openstack/nova")
-    revisions = get_revisions(change_ids[:800], "openstack/nova")
+    repo = "openstack/nova"
+    path = "/home/jogo/Develop/openstack/nova"
+    change_ids = library.get_change_ids(path)
+    revisions = get_revisions(change_ids[:80], repo)
     library.stats(revisions)
     plot_revisions(revisions)
+
+    change_ids = library.get_change_ids(path, subtree='nova/virt')
+    revisions = get_revisions(change_ids[:80], repo)
+    library.stats(revisions)
 
 if __name__ == '__main__':
     main()
