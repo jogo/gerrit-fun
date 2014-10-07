@@ -1,10 +1,15 @@
 import json
+import logging
 import os
 import subprocess
 import urllib
 
 import grequests
 import numpy
+
+logging.basicConfig()
+logger = logging.getLogger("recheck")
+logger.setLevel(logging.DEBUG)
 
 
 def get_change_ids(repo_path, subtree=None, since="6.months"):
@@ -43,7 +48,12 @@ def query_gerrit(template, change_ids, repo_name):
         queries.append(template % patch_id)
     unsent = (grequests.get(query) for query in queries)
     for r in grequests.map(unsent, size=10):
-        yield json.loads(r.text[4:])
+        try:
+            yield json.loads(r.text[4:])
+        except AttributeError:
+            # request must have failed, ignore it and move on
+            logger.debug("failed to parse gerrit response")
+            pass
 
 
 def get_change_details(change_ids, repo_name):
