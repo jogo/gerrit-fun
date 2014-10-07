@@ -1,6 +1,7 @@
 import logging
-
 import matplotlib.pyplot as plt
+
+import yaml
 
 import library
 
@@ -73,22 +74,26 @@ def get_rechecks(change_ids, repo):
     return rechecks
 
 
-def plot_rechecks(normalized_rechecks):
+def plot_rechecks(normalized_rechecks, repo):
     y = sorted(normalized_rechecks)
     x = range(len(normalized_rechecks))
 
     plt.plot(x, y)
     plt.title("Q: How many rechecks/reverifies does it take to "
-              "merge a patch in nova?")
+              "merge a patch in %s?" % repo)
     plt.ylabel("(# of rechecks and reverifies)/(# of patch revisions)")
     plt.show()
 
 
 def main():
-    change_ids = library.get_change_ids("/home/jogo/Develop/openstack/nova")
-    rechecks = get_rechecks(change_ids[:800], "openstack/nova")
+    config = yaml.load(open('config.yaml', 'r'))
+    repo = config['repo']
+    path = config['path'] + repo
+
+    change_ids = library.get_change_ids(path)
+    rechecks = get_rechecks(change_ids[:config['limit']], repo)
     library.stats(rechecks)
-    plot_rechecks(rechecks)
+    plot_rechecks(rechecks, repo)
 
 if __name__ == '__main__':
     main()

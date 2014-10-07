@@ -1,0 +1,3 @@
+repo: 'openstack/nova'
+path: '/home/'
+limit: null #limit search to last X patches. Useful for testing

@@ -1,6 +1,7 @@
 import datetime
-
 import matplotlib.pyplot as plt
+
+import yaml
 
 import library
 
@@ -42,17 +43,21 @@ def process_change_ids(change_ids, repo):
     duration = get_duration(change_ids[:800], repo)
     # duration should be in days
     library.stats(duration)
-    plot_durations(duration)
+    #plot_durations(duration)
 
 
 def main():
-    repo = "openstack/nova"
-    path = "/home/jogo/Develop/openstack/nova"
+    config = yaml.load(open('config.yaml', 'r'))
+    repo = config['repo']
+    path = config['path'] + repo
+
     change_ids = library.get_change_ids(path)
+    change_ids = change_ids[:config['limit']]
     print "all of nova:"
     process_change_ids(change_ids, repo)
 
     change_ids = library.get_change_ids(path, subtree='nova/virt')
+    change_ids = change_ids[:config['limit']]
     print "nova/virt"
     process_change_ids(change_ids, repo)
 

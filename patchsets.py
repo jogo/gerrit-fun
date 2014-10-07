@@ -1,6 +1,7 @@
 import logging
-
 import matplotlib.pyplot as plt
+
+import yaml
 
 import library
 
@@ -25,28 +26,27 @@ def get_revisions(change_ids, repo):
     return revisions
 
 
-def plot_revisions(revisions):
+def plot_revisions(revisions, repo):
     y = sorted(revisions)
     x = range(len(revisions))
 
     plt.plot(x, y)
     plt.title("Q: How many revisions  does it take to "
-              "merge a patch in nova?")
+              "merge a patch in %s?" % repo)
     plt.ylabel("number of revisions")
     plt.show()
 
 
 def main():
-    repo = "openstack/nova"
-    path = "/home/jogo/Develop/openstack/nova"
-    change_ids = library.get_change_ids(path)
-    revisions = get_revisions(change_ids[:80], repo)
-    library.stats(revisions)
-    plot_revisions(revisions)
+    config = yaml.load(open('config.yaml', 'r'))
+    repo = config['repo']
+    path = config['path'] + repo
 
-    change_ids = library.get_change_ids(path, subtree='nova/virt')
-    revisions = get_revisions(change_ids[:80], repo)
+    change_ids = library.get_change_ids(path)
+    change_ids = change_ids[:config['limit']]
+    revisions = get_revisions(change_ids, repo)
     library.stats(revisions)
+    plot_revisions(revisions, repo)
 
 if __name__ == '__main__':
     main()

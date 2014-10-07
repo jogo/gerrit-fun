@@ -1,7 +1,6 @@
 *.pyc
 *.png
-stackalytics.json
 .tox
 *.egg-info
 .testrepository/
-doc/build
+config.yaml
