@@ -15,6 +15,7 @@ import library
 
 FORMAT = '%Y-%m-%d %H:%M:%S.%f000'
 
+
 def get_duration(change_ids, repo):
     durations = []
     for details in library.get_latest_revision(change_ids, repo):
@@ -25,6 +26,7 @@ def get_duration(change_ids, repo):
         # rounds down to nearest day
         durations.append((approved - created).days)
     return durations
+
 
 def plot_durations(revisions):
     y = sorted(revisions)
@@ -43,7 +45,6 @@ def process_change_ids(change_ids, repo):
     plot_durations(duration)
 
 
-
 def main():
     repo = "openstack/nova"
     path = "/home/jogo/Develop/openstack/nova"
@@ -54,8 +55,6 @@ def main():
     change_ids = library.get_change_ids(path, subtree='nova/virt')
     print "nova/virt"
     process_change_ids(change_ids, repo)
-
-
 
 if __name__ == '__main__':
     main()
