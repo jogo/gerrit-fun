@@ -48,6 +48,7 @@ def main():
     repo = "openstack/governance"
     path = config['path'] + repo
 
+    # NOTE this is only in final revisions and doesn't include abandoned patches
     change_ids = library.get_change_ids(path, since="5.months")
     change_ids = change_ids[:config['limit']]
     print_voting_record(change_ids, repo)
