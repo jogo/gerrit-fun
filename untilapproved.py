@@ -47,19 +47,23 @@ def process_change_ids(change_ids, repo):
 
 
 def main():
+    def process_subtree(subtree):
+        change_ids = library.get_change_ids(path, subtree=subtree)
+        change_ids = change_ids[:config['limit']]
+        print "subtree: %s (%s patches):" % (subtree, len(change_ids))
+        process_change_ids(change_ids, repo)
+
     config = yaml.load(open('config.yaml', 'r'))
     repo = config['repo']
     path = config['path'] + repo
+    print "repo: %s" % repo
 
-    change_ids = library.get_change_ids(path)
-    change_ids = change_ids[:config['limit']]
-    print "all of nova (%s patches):" % len(change_ids)
-    process_change_ids(change_ids, repo)
-
-    change_ids = library.get_change_ids(path, subtree='nova/virt')
-    change_ids = change_ids[:config['limit']]
-    print "nova/virt (%s patches):" % len(change_ids)
-    process_change_ids(change_ids, repo)
+    process_subtree(None)
+    process_subtree('nova/virt/')
+    process_subtree('nova/virt/hyperv/')
+    process_subtree('nova/virt/libvirt/')
+    process_subtree('nova/virt/xenapi/')
+    process_subtree('nova/virt/vmwareapi/')
 
 if __name__ == '__main__':
     main()
