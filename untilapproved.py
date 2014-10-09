@@ -40,10 +40,10 @@ def plot_durations(revisions):
 
 
 def process_change_ids(change_ids, repo):
-    duration = get_duration(change_ids[:800], repo)
+    duration = get_duration(change_ids, repo)
     # duration should be in days
     library.stats(duration)
-    #plot_durations(duration)
+    # plot_durations(duration)
 
 
 def main():
@@ -53,12 +53,12 @@ def main():
 
     change_ids = library.get_change_ids(path)
     change_ids = change_ids[:config['limit']]
-    print "all of nova:"
+    print "all of nova (%s patches):" % len(change_ids)
     process_change_ids(change_ids, repo)
 
     change_ids = library.get_change_ids(path, subtree='nova/virt')
     change_ids = change_ids[:config['limit']]
-    print "nova/virt"
+    print "nova/virt (%s patches):" % len(change_ids)
     process_change_ids(change_ids, repo)
 
 if __name__ == '__main__':
