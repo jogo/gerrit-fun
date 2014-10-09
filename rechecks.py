@@ -45,13 +45,16 @@ def valid_recheck(change_details, recheck_position):
                 failure_list = get_failed_jobs(message['message'])
             else:
                 new_list = get_failed_jobs(message['message'])
+                failures = []
                 for failure in failure_list:
                     if failure in new_list:
-                        logger.debug("recheck didn't work, found %s before "
-                                     "and after" % failure)
+                        failures.append(failure)
                         # logger.debug(message['message'].split('\n')[4])
                         # Found failure after the recheck
-                        return False
+                if len(failures) is not 0:
+                    logger.debug("recheck didn't work, found %s before "
+                                 "and after" % failures)
+                    return False
                 # Stop after first jenkins comment after recheck
                 return True
 
