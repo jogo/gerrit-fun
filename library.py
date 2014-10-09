@@ -47,7 +47,7 @@ def query_gerrit(template, change_ids, repo_name):
         patch_id = urllib.quote_plus("%s~master~" % repo_name) + change_id
         queries.append(template % patch_id)
     unsent = (grequests.get(query) for query in queries)
-    for r in grequests.map(unsent, size=10):
+    for r in grequests.imap(unsent, size=10):
         try:
             yield json.loads(r.text[4:])
         except AttributeError:
